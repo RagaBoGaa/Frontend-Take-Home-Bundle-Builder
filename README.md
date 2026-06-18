@@ -43,38 +43,6 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-## Tech Stack
-
-| Layer | Technology | Reason |
-|---|---|---|
-| **Framework** | React 19 + TypeScript | Stable, excellent DX, type-safe component props |
-| **Bundler / Dev Server** | Vite 8 | Instant cold starts, native ESM, fast HMR |
-| **Styling** | Tailwind CSS v4 | Utility-first; v4's `@theme` + `@utility` replace a separate config file |
-| **State Management** | React Context + `useReducer` | Sufficient complexity for this scope; zero external runtime dependencies |
-| **Persistence** | `localStorage` | Client-side save/restore of the bundle without a backend |
-| **Type System** | TypeScript strict mode | Catches prop/data shape mismatches at compile time |
-| **Linting** | ESLint 10 + `typescript-eslint` + `eslint-plugin-react-hooks` | Enforces hooks rules and fast-refresh compatibility |
-
----
-
-## Architecture
-
-```
-src/
-├── types/index.ts               — All TypeScript interfaces (Product, Variant, Step, BundleState …)
-├── data/products.ts             — Product catalog, steps, shipping & financing config (data-driven)
-├── context/BundleContext.tsx    — Global state: selections, active variants, active step, business rules
-├── hooks/usePersistedState.ts   — localStorage save / restore helpers
-├── utils/calculations.ts        — Selection keys, review line-item builder, totals, price formatting
-├── assets/icons/index.json      — Compiled SVG sprite registry (see "Icon System" below)
-└── components/
-    ├── App.tsx                  — Two-column responsive shell (sticky review panel on desktop)
-    ├── Builder/                 — Left column: accordion steps, product grid, cards, steppers
-    └── ReviewPanel/             — Right column: live summary, totals, checkout CTA
-```
-
----
-
 ## Key Design Decisions
 
 ### Typography — Plus Jakarta Sans instead of Gilroy

@@ -1,0 +1,148 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* ── Brand ── */
+  --color-primary:            #4E2FD2;
+  --color-primary-hover:      #3d24aa;
+
+  /* ── Backgrounds ── */
+  --color-background-blue:    #EDF4FF;
+
+  /* ── Text ── */
+  --color-text-main:          #1F1F1F;
+  --color-text-heading:       #0B0D10;
+  --color-text-muted:         #484848;
+  --color-text-light:         #575757;
+  --color-text-subtle:        #6F7882;
+  --color-text-placeholder:   #A8B2BD;
+
+  /* ── Semantic ── */
+  --color-price-original:     #D8392B;
+  --color-teal:               #0AA288;
+  --color-teal-light:         #e6f7f5;
+
+  /* ── Borders ── */
+  --color-border-default:     rgba(78, 47, 210, 0.7);
+  --color-border-light:       #CED6DE;
+  --color-border-subtle:      #E6EBF0;
+
+  /* ── Fonts ── */
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+/* ─────────────────────────────────────────
+   Global resets
+───────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─────────────────────────────────────────
+   Reusable Utilities  (@utility)
+───────────────────────────────────────── */
+@utility label-overline {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+@utility text-price {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  color: var(--color-primary);
+}
+
+@utility text-price-strike {
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  color: var(--color-text-subtle);
+  text-decoration: line-through;
+}
+
+@utility section-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-placeholder);
+}
+
+@utility btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 14px;
+  color: white;
+  background-color: var(--color-primary);
+  transition: background-color 200ms, transform 150ms, box-shadow 200ms;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+@utility btn-primary-hover {
+  background-color: var(--color-primary-hover);
+  box-shadow: 0 4px 16px rgba(78, 47, 210, 0.35);
+  transform: translateY(-1px);
+}
+
+/* ─────────────────────────────────────────
+   Keyframes
+───────────────────────────────────────── */
+@keyframes shine {
+  0%   { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(250%) skewX(-15deg); }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-gentle {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.75; }
+}
+
+/* ─────────────────────────────────────────
+   Animation utility classes
+───────────────────────────────────────── */
+.animate-fade-in-up {
+  animation: fade-in-up 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Checkout button shimmer */
+.btn-shimmer::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  width: 40%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 100%
+  );
+  animation: shine 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}

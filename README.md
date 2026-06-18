@@ -45,6 +45,66 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## Key Design Decisions
 
+
+### Required Item Business Rule — Wyze Sense Hub
+
+**Context:** The Wyze Sense Hub is a gateway device required for any sensor to function. It is a zero-cost item included automatically whenever the user selects at least one sensor.
+
+**Rule:** `wyze-sense-hub` quantity must be exactly `1` when any sensor is selected, and `0` when no sensors are selected.
+
+**Implementation:** The rule lives in `enforceBusinessRules()` inside `src/context/BundleContext.tsx`, which runs as the **final step of every reducer action**:
+
+```typescript
+// BundleContext.tsx — runs after every dispatch
+function enforceBusinessRules(state: BundleState): BundleState {
+  // 1. Sum all sensor quantities (excluding the hub itself)
+  const sensorProducts = bundleData.steps
+    .flatMap((s) => s.products)
+    .filter((p) => p.reviewCategory === "Sensors" && p.id !== "wyze-sense-hub");
+
+  let totalSensors = 0;
+  for (const product of sensorProducts) {
+    // Variant-aware: sum across all colour variants of a sensor
+    if (product.variants?.length) {
+      for (const variant of product.variants) {
+        totalSensors += state.selections[`${product.id}::${variant.id}`] ?? 0;
+      }
+    } else {
+      totalSensors += state.selections[product.id] ?? 0;
+    }
+  }
+
+  // 2. Hub qty is 1 if any sensor exists, 0 otherwise
+  const newHubQty = totalSensors > 0 ? 1 : 0;
+
+  if ((state.selections["wyze-sense-hub"] ?? 0) !== newHubQty) {
+    return {
+      ...state,
+      selections: { ...state.selections, "wyze-sense-hub": newHubQty },
+    };
+  }
+  return state;
+}
+```
+
+**What this means for the UI:**
+
+| User action | Hub behaviour |
+|---|---|
+| Adds first sensor | Hub appears in Review Panel as `(Required)` with qty `1`, FREE |
+| Adds more sensors | Hub remains at qty `1` — not multiplied |
+| Removes all sensors | Hub silently disappears from the Review Panel |
+| Tries to decrement Hub in review panel | Stepper is disabled (`isRequired: true` → `disabled` prop on `QuantityStepper`) |
+
+The hub is flagged `isRequired: true` in `products.ts`, which:
+1. Disables the `−` stepper button on the review line item.
+2. Appends `(Required)` to the name in the Review Panel.
+3. Does **not** render on the product card grid — it only ever appears in the review.
+
+This approach intentionally keeps business rules in one place (the reducer post-processor) rather than scattered across component `onClick` handlers. Adding a new constraint in future means adding one more check to `enforceBusinessRules`.
+
+---
+
 ### Typography — Plus Jakarta Sans instead of Gilroy
 
 **Decision:** The project uses [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans) (served via Google Fonts) rather than Gilroy.
@@ -132,64 +192,6 @@ The `Icon` component (`src/components/ui/Icon.tsx`):
 
 ---
 
-### Required Item Business Rule — Wyze Sense Hub
-
-**Context:** The Wyze Sense Hub is a gateway device required for any sensor to function. It is a zero-cost item included automatically whenever the user selects at least one sensor.
-
-**Rule:** `wyze-sense-hub` quantity must be exactly `1` when any sensor is selected, and `0` when no sensors are selected.
-
-**Implementation:** The rule lives in `enforceBusinessRules()` inside `src/context/BundleContext.tsx`, which runs as the **final step of every reducer action**:
-
-```typescript
-// BundleContext.tsx — runs after every dispatch
-function enforceBusinessRules(state: BundleState): BundleState {
-  // 1. Sum all sensor quantities (excluding the hub itself)
-  const sensorProducts = bundleData.steps
-    .flatMap((s) => s.products)
-    .filter((p) => p.reviewCategory === "Sensors" && p.id !== "wyze-sense-hub");
-
-  let totalSensors = 0;
-  for (const product of sensorProducts) {
-    // Variant-aware: sum across all colour variants of a sensor
-    if (product.variants?.length) {
-      for (const variant of product.variants) {
-        totalSensors += state.selections[`${product.id}::${variant.id}`] ?? 0;
-      }
-    } else {
-      totalSensors += state.selections[product.id] ?? 0;
-    }
-  }
-
-  // 2. Hub qty is 1 if any sensor exists, 0 otherwise
-  const newHubQty = totalSensors > 0 ? 1 : 0;
-
-  if ((state.selections["wyze-sense-hub"] ?? 0) !== newHubQty) {
-    return {
-      ...state,
-      selections: { ...state.selections, "wyze-sense-hub": newHubQty },
-    };
-  }
-  return state;
-}
-```
-
-**What this means for the UI:**
-
-| User action | Hub behaviour |
-|---|---|
-| Adds first sensor | Hub appears in Review Panel as `(Required)` with qty `1`, FREE |
-| Adds more sensors | Hub remains at qty `1` — not multiplied |
-| Removes all sensors | Hub silently disappears from the Review Panel |
-| Tries to decrement Hub in review panel | Stepper is disabled (`isRequired: true` → `disabled` prop on `QuantityStepper`) |
-
-The hub is flagged `isRequired: true` in `products.ts`, which:
-1. Disables the `−` stepper button on the review line item.
-2. Appends `(Required)` to the name in the Review Panel.
-3. Does **not** render on the product card grid — it only ever appears in the review.
-
-This approach intentionally keeps business rules in one place (the reducer post-processor) rather than scattered across component `onClick` handlers. Adding a new constraint in future means adding one more check to `enforceBusinessRules`.
-
----
 
 ## What's Working
 

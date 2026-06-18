@@ -44,7 +44,7 @@ export function buildReviewLineItems(
               selectionKey: key,
               name: product.name,
               variantLabel: variant.label,
-              image: product.image,
+              image: variant.swatch,
               quantity: qty,
               compareAtPrice: product.compareAtPrice
                 ? product.compareAtPrice * qty
